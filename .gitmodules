@@ -1,0 +1,21 @@
+[submodule "bundles/illarion-vbu"]
+	path = bundles/illarion-vbu
+	url = https://github.com/SeleneWorlds/Illarion-VBU-Scripts.git
+[submodule "bundles/illarion-gobaith-data"]
+	path = bundles/illarion-gobaith-data
+	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Data.git
+[submodule "bundles/illarion-gobaith-ui"]
+	path = bundles/illarion-gobaith-ui
+	url = https://github.com/SeleneWorlds/Illarion-Gobaith-UI.git
+[submodule "bundles/illarion-script-loader"]
+	path = bundles/illarion-script-loader
+	url = https://github.com/SeleneWorlds/Illarion-Script-Loader.git
+[submodule "bundles/illarion-api"]
+	path = bundles/illarion-api
+	url = https://github.com/SeleneWorlds/Illarion-API-Bridge.git
+[submodule "bundles/illarion-gobaith-map"]
+	path = bundles/illarion-gobaith-map
+	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Map.git
+[submodule "bundles/moonlight"]
+	path = bundles/moonlight
+	url = https://github.com/SeleneWorlds/Moonlight.git

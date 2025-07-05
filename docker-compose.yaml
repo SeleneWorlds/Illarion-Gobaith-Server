@@ -1,0 +1,12 @@
+services:
+  selene:
+    image: 'docker.twelveiterations.com/seleneworlds/selene:main'
+    ports:
+      - '8147:8147'
+    volumes:
+      - ./bundles:/app/bundles
+      - ./server.properties:/app/server.properties
+      - selene_save:/app/save
+
+volumes:
+  selene_save:
