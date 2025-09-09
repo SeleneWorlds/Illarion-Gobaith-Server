@@ -1,6 +1,3 @@
-[submodule "bundles/illarion-vbu"]
-	path = bundles/illarion-vbu
-	url = https://github.com/SeleneWorlds/Illarion-VBU-Scripts.git
 [submodule "bundles/illarion-gobaith-data"]
 	path = bundles/illarion-gobaith-data
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Data.git
@@ -16,6 +13,6 @@
 [submodule "bundles/illarion-gobaith-map"]
 	path = bundles/illarion-gobaith-map
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Map.git
-[submodule "bundles/moonlight"]
-	path = bundles/moonlight
-	url = https://github.com/SeleneWorlds/Moonlight.git
+[submodule "bundles/moonlight-inventory"]
+	path = bundles/moonlight-inventory
+	url = https://github.com/SeleneWorlds/Moonlight-Inventory.git
