@@ -6,6 +6,7 @@ services:
     volumes:
       - ./bundles:/app/bundles
       - ./server.properties:/app/server.properties
+      - ./script.properties:/app/script.properties
       - selene_save:/app/save
 
 volumes:
