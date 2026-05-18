@@ -9,7 +9,7 @@
 	url = https://github.com/SeleneWorlds/Illarion-Script-Loader.git
 [submodule "bundles/illarion-api"]
 	path = bundles/illarion-api
-	url = https://github.com/SeleneWorlds/Illarion-API-Bridge.git
+	url = https://github.com/SeleneWorlds/Illarion-API.git
 [submodule "bundles/illarion-gobaith-map"]
 	path = bundles/illarion-gobaith-map
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Map.git
@@ -19,3 +19,6 @@
 [submodule "bundles/illarion-gobaith-assets"]
 	path = bundles/illarion-gobaith-assets
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Assets.git
+[submodule "bundles/illarion-gobaith"]
+	path = bundles/illarion-gobaith
+	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Scripts.git
