@@ -16,3 +16,6 @@
 [submodule "bundles/moonlight-inventory"]
 	path = bundles/moonlight-inventory
 	url = https://github.com/SeleneWorlds/Moonlight-Inventory.git
+[submodule "bundles/illarion-gobaith-assets"]
+	path = bundles/illarion-gobaith-assets
+	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Assets.git
