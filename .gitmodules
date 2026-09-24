@@ -22,3 +22,6 @@
 [submodule "bundles/illarion-gobaith"]
 	path = bundles/illarion-gobaith
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Scripts.git
+[submodule "bundles/consequence"]
+	path = bundles/consequence
+	url = https://github.com/SeleneWorlds/Consequence.git
