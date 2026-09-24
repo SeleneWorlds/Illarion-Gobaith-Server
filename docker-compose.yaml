@@ -1,12 +1,12 @@
 services:
   selene:
-    image: 'docker.twelveiterations.com/seleneworlds/selene:main'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 'selene-gobaith-server:local'
     ports:
       - '8147:8147'
     volumes:
-      - ./bundles:/app/bundles
-      - ./server.properties:/app/server.properties
-      - ./script.properties:/app/script.properties
       - selene_save:/app/save
 
 volumes:
