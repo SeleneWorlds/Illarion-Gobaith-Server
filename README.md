@@ -15,3 +15,10 @@ This is a Docker Compose setup for running Illarion in its Gobaith version on Se
 
 The Docker image build compiles `illarion-gobaith-ui` and includes the resulting
 UI, all bundles, and the server configuration in the Selene runtime image.
+
+## Updating
+
+ ```sh
+git submodule sync --recursive
+git submodule update --init --remote --recursive
+ ```
