@@ -25,3 +25,9 @@
 [submodule "bundles/consequence"]
 	path = bundles/consequence
 	url = https://github.com/SeleneWorlds/Consequence.git
+[submodule "bundles/moonlight-admin"]
+	path = bundles/moonlight-admin
+	url = https://github.com/SeleneWorlds/Moonlight-Admin.git
+[submodule "bundles/illarion-admin-menu"]
+	path = bundles/illarion-admin-menu
+	url = https://github.com/SeleneWorlds/Illarion-Admin-Menu.git
