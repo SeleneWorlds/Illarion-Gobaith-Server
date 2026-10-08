@@ -13,7 +13,7 @@ This is a Docker Compose setup for running Illarion in its Gobaith version on Se
 2. Initialize the bundle submodules with `git submodule update --init --recursive`
 3. Run `docker compose up --build -d`
 
-The Docker image build compiles `illarion-gobaith-ui` and `moonlight-admin`, and
+The Docker image build compiles `illarion-gobaith-ui`, `moonlight-admin`, and `moonlight-editor`, and
 includes the resulting UIs, all bundles, and the server configuration in the
 Selene runtime image.
 
