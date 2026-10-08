@@ -31,3 +31,6 @@
 [submodule "bundles/illarion-admin-menu"]
 	path = bundles/illarion-admin-menu
 	url = https://github.com/SeleneWorlds/Illarion-Admin-Menu.git
+[submodule "bundles/moonlight-editor"]
+	path = bundles/moonlight-editor
+	url = https://github.com/SeleneWorlds/Moonlight-Editor.git
