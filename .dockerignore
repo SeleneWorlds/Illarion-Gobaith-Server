@@ -1,5 +1,9 @@
 .git
 .idea
+.env
+secrets/
 **/.git
 **/node_modules
 **/client/ui/dist
+bundles/illarion-gobaith-data
+bundles/illarion-gobaith

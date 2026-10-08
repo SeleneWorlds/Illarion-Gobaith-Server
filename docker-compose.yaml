@@ -1,13 +1,52 @@
 services:
+  repo-sync:
+    build:
+      context: ./docker/repo-sync
+    restart: unless-stopped
+    environment:
+      GIT_TERMINAL_PROMPT: '0'
+      DATA_SSH_KEY: ${GOBAITH_DATA_DEPLOY_KEY:-}
+      SCRIPTS_SSH_KEY: ${GOBAITH_SCRIPTS_DEPLOY_KEY:-}
+      GIT_AUTHOR_NAME: ${GOBAITH_DATA_GIT_AUTHOR_NAME:-Selene Server}
+      GIT_AUTHOR_EMAIL: ${GOBAITH_DATA_GIT_AUTHOR_EMAIL:-selene@localhost}
+      SYNC_INTERVAL_SECONDS: ${GOBAITH_DATA_SYNC_INTERVAL_SECONDS:-300}
+      DATA_BRANCH: ${GOBAITH_DATA_GIT_BRANCH:-}
+      SCRIPTS_BRANCH: ${GOBAITH_SCRIPTS_GIT_BRANCH:-}
+      WEBHOOK_SECRET: ${GOBAITH_SCRIPTS_WEBHOOK_SECRET:-}
+    healthcheck:
+      test: ['CMD', '/usr/local/bin/repo-sync', 'healthcheck']
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - gobaith_data:/data
+      - gobaith_scripts:/scripts
+
   selene:
     build:
       context: .
       dockerfile: Dockerfile
     image: 'selene-gobaith-server:local'
+    depends_on:
+      repo-sync:
+        condition: service_healthy
     ports:
       - '8147:8147'
     volumes:
       - selene_save:/app/save
+      - type: volume
+        source: gobaith_data
+        target: /app/bundles/illarion-gobaith-data
+        volume:
+          nocopy: true
+      - type: volume
+        source: gobaith_scripts
+        target: /app/bundles/illarion-gobaith
+        read_only: true
+        volume:
+          nocopy: true
 
 volumes:
   selene_save:
+  gobaith_data:
+  gobaith_scripts:

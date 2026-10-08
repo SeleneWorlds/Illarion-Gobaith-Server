@@ -1,6 +1,3 @@
-[submodule "bundles/illarion-gobaith-data"]
-	path = bundles/illarion-gobaith-data
-	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Data.git
 [submodule "bundles/illarion-gobaith-ui"]
 	path = bundles/illarion-gobaith-ui
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-UI.git
@@ -19,9 +16,6 @@
 [submodule "bundles/illarion-gobaith-assets"]
 	path = bundles/illarion-gobaith-assets
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Assets.git
-[submodule "bundles/illarion-gobaith"]
-	path = bundles/illarion-gobaith
-	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Scripts.git
 [submodule "bundles/consequence"]
 	path = bundles/consequence
 	url = https://github.com/SeleneWorlds/Consequence.git

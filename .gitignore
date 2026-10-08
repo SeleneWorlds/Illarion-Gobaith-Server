@@ -1,1 +1,5 @@
 .idea
+/bundles/illarion-gobaith-data/
+/bundles/illarion-gobaith/
+.env
+/secrets/
