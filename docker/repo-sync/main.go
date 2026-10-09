@@ -25,6 +25,7 @@ import (
 type repository struct {
 	path, url, branch, key, knownHosts string
 	writable                           bool
+	messages                           *commitMessages
 	mu                                 sync.Mutex
 }
 
@@ -86,7 +87,18 @@ func (r *repository) commit(ctx context.Context) error {
 	if err != nil || changes == "" {
 		return err
 	}
-	_, err = r.git(ctx, "-C", r.path, "commit", "-m", "Persist changes made by the Selene server")
+	message := defaultCommitMessage
+	if r.messages != nil {
+		diff, generationErr := r.git(ctx, "-C", r.path, "diff", "--cached", "--no-ext-diff", "--no-textconv", "--unified=3")
+		if generationErr == nil {
+			message, generationErr = r.messages.generate(ctx, changes, diff)
+		}
+		if generationErr != nil {
+			log.Printf("commit message generation failed: %v; using default message", generationErr)
+			message = defaultCommitMessage
+		}
+	}
+	_, err = r.git(ctx, "-C", r.path, "commit", "-m", message)
 	return err
 }
 
@@ -317,8 +329,14 @@ func main() {
 	// Git and SSH subprocesses only need key paths, not the original secret values.
 	os.Unsetenv("DATA_SSH_KEY")
 	os.Unsetenv("SCRIPTS_SSH_KEY")
+	var messages *commitMessages
+	if key := os.Getenv("OPENAI_API_KEY"); key != "" {
+		messages = &commitMessages{key: key, model: env("OPENAI_MODEL", "gpt-4.1-mini"), client: &http.Client{Timeout: 30 * time.Second}}
+	}
+	os.Unsetenv("OPENAI_API_KEY")
 	knownHosts := env("SSH_KNOWN_HOSTS_FILE", "/etc/repo-sync/known_hosts")
 	data := &repository{path: "/data", url: env("DATA_REPOSITORY", "git@github.com:SeleneWorlds/Illarion-Gobaith-Data.git"), branch: os.Getenv("DATA_BRANCH"), key: dataKey, knownHosts: knownHosts, writable: true}
+	data.messages = messages
 	scripts := &repository{path: "/scripts", url: env("SCRIPTS_REPOSITORY", "git@github.com:SeleneWorlds/Illarion-Gobaith-Scripts.git"), branch: os.Getenv("SCRIPTS_BRANCH"), key: scriptsKey, knownHosts: knownHosts}
 	s := &service{scripts: scripts, secret: os.Getenv("WEBHOOK_SECRET"), repositoryName: "SeleneWorlds/Illarion-Gobaith-Scripts", pulls: make(chan struct{}, 1)}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)

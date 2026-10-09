@@ -73,9 +73,20 @@ Configure these values in the ignored `.env` file:
 | `GOBAITH_DATA_GIT_AUTHOR_NAME` | Commit author; defaults to `Selene Server` |
 | `GOBAITH_DATA_GIT_AUTHOR_EMAIL` | Commit email; defaults to `selene@localhost` |
 | `GOBAITH_DATA_SYNC_INTERVAL_SECONDS` | Commit/push interval; defaults to `300`, range `1–86400` |
+| `OPENAI_API_KEY` | Optional OpenAI API key for generated data commit messages |
+| `OPENAI_MODEL` | Commit message model; defaults to `gpt-4.1-mini` |
 | `GOBAITH_DATA_GIT_BRANCH` | Optional data branch; otherwise uses the remote default on first clone |
 | `GOBAITH_SCRIPTS_GIT_BRANCH` | Optional scripts branch; otherwise uses the remote default on first clone |
 | `GOBAITH_SCRIPTS_WEBHOOK_SECRET` | Shared GitHub webhook secret; empty disables webhooks |
+
+When `OPENAI_API_KEY` is set, the sidecar sends staged file names (up to 16 KB)
+and a staged diff (up to 64 KB) to the
+[OpenAI Responses API](https://developers.openai.com/api/docs/guides/text)
+to generate each data commit message, including startup commits. Requests disable
+response storage and time out after 30 seconds. Without a key, or if generation
+fails or returns an invalid message, it uses `Persist changes made by the Selene server`.
+No request is made when there are no staged changes. The key is passed only to
+the sidecar and cleared from its environment before Git subprocesses run.
 
 The selected branches remain those of the persistent checkouts. Changing a branch
 setting to differ from an existing checkout blocks readiness; migrate the checkout
