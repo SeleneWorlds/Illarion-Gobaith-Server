@@ -245,6 +245,48 @@ func TestDataRebaseConflictAborts(t *testing.T) {
 		if head := command(t, "--git-dir", r.url, "rev-parse", "HEAD"); head != remoteHead {
 			t.Fatal("conflicting changes were pushed")
 		}
+		if _, err := os.Stat(filepath.Join(r.path, ".selenelock")); !os.IsNotExist(err) {
+			t.Fatalf("lock remained after abort: %v", err)
+		}
+	}
+}
+
+func TestServerWriteLockDuringPersistence(t *testing.T) {
+	r, _ := fixture(t, true)
+	ctx := context.Background()
+	if err := r.initialize(ctx); err != nil {
+		t.Fatal(err)
+	}
+	// Git hooks observe the lock at both commit and push time.
+	for _, hook := range []string{"pre-commit", "pre-push"} {
+		path := filepath.Join(r.path, ".git", "hooks", hook)
+		write(t, path, "#!/bin/sh\ntest -f .selenelock || exit 1\nif git diff --cached --name-only | grep -qx .selenelock; then exit 1; fi\n")
+		if err := os.Chmod(path, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write(t, filepath.Join(r.path, "local.txt"), "server edit")
+	if err := r.persist(ctx); err != nil {
+		t.Fatal(err)
+	}
+	lockPath := filepath.Join(r.path, ".selenelock")
+	if _, err := os.Stat(lockPath); !os.IsNotExist(err) {
+		t.Fatalf("lock remained after success: %v", err)
+	}
+	if files := command(t, "--git-dir", r.url, "ls-tree", "--name-only", "HEAD"); strings.Contains(files, ".selenelock") {
+		t.Fatal("server write lock was committed")
+	}
+	write(t, lockPath, "external lock")
+	write(t, filepath.Join(r.path, "local.txt"), "pending edit")
+	head := command(t, "-C", r.path, "rev-parse", "HEAD")
+	if err := r.persist(ctx); err == nil || !strings.Contains(err.Error(), "create server write lock") {
+		t.Fatalf("existing lock should block sync: %v", err)
+	}
+	if got := command(t, "-C", r.path, "rev-parse", "HEAD"); got != head {
+		t.Fatal("sync proceeded despite existing lock")
+	}
+	if contents, err := os.ReadFile(lockPath); err != nil || string(contents) != "external lock" {
+		t.Fatal("external lock was changed")
 	}
 }
 

@@ -98,6 +98,13 @@ logs; conflicts require manual resolution. The sidecar never force-pushes.
 
 Remote data changes are also applied when recovering from a failed push, which
 can update data files while Selene is running.
+After the initial clone, sync creates `.selenelock` in the checkout root before
+startup updates, data staging/commits/pushes (including rebase recovery), and
+scripts pulls. Selene must honor this marker to pause directory writes. The
+marker is excluded from commits and removed when the operation finishes,
+including after an aborted rebase. An existing marker blocks sync and is left
+untouched. A forcibly terminated sidecar can leave a stale marker; remove it
+only after verifying no sync or manual checkout operation is running.
 Background push failures do not clear startup readiness. Compose's readiness
 dependency gates startup; it does not stop an already running Selene if the
 sidecar later restarts or becomes unhealthy.

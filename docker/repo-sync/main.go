@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -80,7 +81,7 @@ func (r *repository) commit(ctx context.Context) error {
 	if !r.writable {
 		return fmt.Errorf("repository is pull-only")
 	}
-	if _, err := r.git(ctx, "-C", r.path, "add", "--all"); err != nil {
+	if _, err := r.git(ctx, "-C", r.path, "add", "--all", "--", ".", ":(top,exclude).selenelock"); err != nil {
 		return err
 	}
 	changes, err := r.git(ctx, "-C", r.path, "diff", "--cached", "--name-only")
@@ -103,11 +104,33 @@ func (r *repository) commit(ctx context.Context) error {
 }
 
 func (r *repository) pull(ctx context.Context) error {
+	return r.withDirectoryLock(func() error { return r.pullLocked(ctx) })
+}
+
+// Callers hold the directory lock until Git has finished changing the checkout.
+func (r *repository) pullLocked(ctx context.Context) error {
 	if r.writable {
 		return r.rebase(ctx)
 	}
 	_, err := r.git(ctx, "-C", r.path, "pull", "--ff-only", "origin", r.branch)
 	return err
+}
+
+func (r *repository) withDirectoryLock(operation func() error) (err error) {
+	path := filepath.Join(r.path, ".selenelock")
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
+	if err != nil {
+		return fmt.Errorf("create server write lock: %w", err)
+	}
+	defer func() {
+		if removeErr := os.Remove(path); removeErr != nil {
+			err = errors.Join(err, fmt.Errorf("remove server write lock: %w", removeErr))
+		}
+	}()
+	if err := file.Close(); err != nil {
+		return fmt.Errorf("close server write lock: %w", err)
+	}
+	return operation()
 }
 
 func (r *repository) rebase(ctx context.Context) error {
@@ -157,6 +180,10 @@ func (r *repository) initialize(ctx context.Context) error {
 	} else if err != nil {
 		return err
 	}
+	return r.withDirectoryLock(func() error { return r.initializeLocked(ctx) })
+}
+
+func (r *repository) initializeLocked(ctx context.Context) error {
 	branch, err := r.git(ctx, "-C", r.path, "symbolic-ref", "--short", "HEAD")
 	if err != nil {
 		return err
@@ -175,12 +202,16 @@ func (r *repository) initialize(ctx context.Context) error {
 			return err
 		}
 	}
-	return r.pull(ctx)
+	return r.pullLocked(ctx)
 }
 
 func (r *repository) persist(ctx context.Context) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.withDirectoryLock(func() error { return r.persistLocked(ctx) })
+}
+
+func (r *repository) persistLocked(ctx context.Context) error {
 	if err := r.commit(ctx); err != nil {
 		return err
 	}
