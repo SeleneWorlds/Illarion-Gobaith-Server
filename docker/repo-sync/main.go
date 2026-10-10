@@ -103,8 +103,43 @@ func (r *repository) commit(ctx context.Context) error {
 }
 
 func (r *repository) pull(ctx context.Context) error {
+	if r.writable {
+		return r.rebase(ctx)
+	}
 	_, err := r.git(ctx, "-C", r.path, "pull", "--ff-only", "origin", r.branch)
 	return err
+}
+
+func (r *repository) rebase(ctx context.Context) error {
+	gitDir, err := r.git(ctx, "-C", r.path, "rev-parse", "--absolute-git-dir")
+	if err != nil {
+		return err
+	}
+	inProgress := func() bool {
+		for _, name := range []string{"rebase-merge", "rebase-apply"} {
+			if _, err := os.Stat(filepath.Join(gitDir, name)); err == nil {
+				return true
+			}
+		}
+		return false
+	}
+	if inProgress() {
+		return fmt.Errorf("rebase already in progress in %s; resolve it manually", r.path)
+	}
+	if _, err := r.git(ctx, "-C", r.path, "fetch", "origin", "refs/heads/"+r.branch); err != nil {
+		return err
+	}
+	if _, err := r.git(ctx, "-C", r.path, "rebase", "--no-autostash", "FETCH_HEAD"); err != nil {
+		if inProgress() {
+			// Cleanup must still run when the original operation was cancelled.
+			if _, abortErr := r.git(context.WithoutCancel(ctx), "-C", r.path, "rebase", "--abort"); abortErr != nil {
+				return fmt.Errorf("rebase failed: %w; abort failed: %v", err, abortErr)
+			}
+			return fmt.Errorf("rebase failed and was aborted: %w", err)
+		}
+		return fmt.Errorf("rebase failed: %w", err)
+	}
+	return nil
 }
 
 func (r *repository) initialize(ctx context.Context) error {
@@ -151,6 +186,13 @@ func (r *repository) persist(ctx context.Context) error {
 	}
 	// Always push: a previous attempt may have committed successfully but failed to push.
 	_, err := r.git(ctx, "-C", r.path, "push", "origin", "HEAD:refs/heads/"+r.branch)
+	if err == nil {
+		return nil
+	}
+	if rebaseErr := r.rebase(ctx); rebaseErr != nil {
+		return fmt.Errorf("push failed: %v; sync failed: %w", err, rebaseErr)
+	}
+	_, err = r.git(ctx, "-C", r.path, "push", "origin", "HEAD:refs/heads/"+r.branch)
 	return err
 }
 

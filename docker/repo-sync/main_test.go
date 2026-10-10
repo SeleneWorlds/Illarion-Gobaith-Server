@@ -181,6 +181,73 @@ func TestScriptsPullOnlyAndDivergence(t *testing.T) {
 	}
 }
 
+func TestDataRebaseRemoteChanges(t *testing.T) {
+	for _, startup := range []bool{false, true} {
+		t.Run(fmt.Sprintf("startup=%v", startup), func(t *testing.T) {
+			r, seed := fixture(t, true)
+			ctx := context.Background()
+			if err := r.initialize(ctx); err != nil {
+				t.Fatal(err)
+			}
+			write(t, filepath.Join(r.path, "local.txt"), "server edit")
+			write(t, filepath.Join(seed, "remote.txt"), "remote edit")
+			command(t, "-C", seed, "add", ".")
+			command(t, "-C", seed, "commit", "-m", "Remote update")
+			command(t, "-C", seed, "push")
+			remoteHead := command(t, "-C", seed, "rev-parse", "HEAD")
+			if startup {
+				if err := r.initialize(ctx); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := r.persist(ctx); err != nil {
+				t.Fatal(err)
+			}
+			if parent := command(t, "-C", r.path, "rev-parse", "HEAD^"); parent != remoteHead {
+				t.Fatal("local commit was not rebased onto the remote tip")
+			}
+			if files := command(t, "--git-dir", r.url, "ls-tree", "--name-only", "HEAD"); files != "local.txt\nold.txt\nremote.txt" {
+				t.Fatalf("missing edits: %s", files)
+			}
+		})
+	}
+}
+
+func TestDataRebaseConflictAborts(t *testing.T) {
+	r, seed := fixture(t, true)
+	ctx := context.Background()
+	if err := r.initialize(ctx); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(r.path, "old.txt"), "local edit")
+	if err := r.commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	localHead := command(t, "-C", r.path, "rev-parse", "HEAD")
+	write(t, filepath.Join(seed, "old.txt"), "remote edit")
+	command(t, "-C", seed, "add", ".")
+	command(t, "-C", seed, "commit", "-m", "Remote conflict")
+	command(t, "-C", seed, "push")
+	remoteHead := command(t, "-C", seed, "rev-parse", "HEAD")
+	for attempt := 0; attempt < 2; attempt++ {
+		if err := r.persist(ctx); err == nil || !strings.Contains(err.Error(), "rebase failed and was aborted") {
+			t.Fatalf("expected aborted rebase error, got %v", err)
+		}
+		if head := command(t, "-C", r.path, "rev-parse", "HEAD"); head != localHead {
+			t.Fatal("abort did not restore local commits")
+		}
+		if contents, err := os.ReadFile(filepath.Join(r.path, "old.txt")); err != nil || string(contents) != "local edit" {
+			t.Fatal("abort did not restore local contents")
+		}
+		if status := command(t, "-C", r.path, "status", "--porcelain"); status != "" {
+			t.Fatalf("checkout left dirty: %s", status)
+		}
+		if head := command(t, "--git-dir", r.url, "rev-parse", "HEAD"); head != remoteHead {
+			t.Fatal("conflicting changes were pushed")
+		}
+	}
+}
+
 func TestWorkerPullsWebhookAndShutsDown(t *testing.T) {
 	data, _ := fixture(t, true)
 	scripts, seed := fixture(t, false)

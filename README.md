@@ -90,11 +90,14 @@ the sidecar and cleared from its environment before Git subprocesses run.
 
 The selected branches remain those of the persistent checkouts. Changing a branch
 setting to differ from an existing checkout blocks readiness; migrate the checkout
-explicitly rather than silently switching it. Pulls use `--ff-only`, preserving
-local changes and refusing diverged histories. Reconcile divergence manually;
-the sidecar never force-pushes, resets, or rebases.
+explicitly rather than silently switching it. Scripts pulls use `--ff-only`, preserving local changes and refusing diverged
+histories. Data sync fetches and rebases local commits onto the remote branch at
+startup. After a failed data push, it fetches and rebases, then retries the push
+once. Failed rebases are aborted to restore local commits and reported in the
+logs; conflicts require manual resolution. The sidecar never force-pushes.
 
-Data is only pulled during startup, avoiding remote edits while Selene is running.
+Remote data changes are also applied when recovering from a failed push, which
+can update data files while Selene is running.
 Background push failures do not clear startup readiness. Compose's readiness
 dependency gates startup; it does not stop an already running Selene if the
 sidecar later restarts or becomes unhealthy.
