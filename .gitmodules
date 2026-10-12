@@ -10,21 +10,15 @@
 [submodule "bundles/illarion-gobaith-map"]
 	path = bundles/illarion-gobaith-map
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Map.git
-[submodule "bundles/moonlight-inventory"]
-	path = bundles/moonlight-inventory
-	url = https://github.com/SeleneWorlds/Moonlight-Inventory.git
 [submodule "bundles/illarion-gobaith-assets"]
 	path = bundles/illarion-gobaith-assets
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Assets.git
 [submodule "bundles/consequence"]
 	path = bundles/consequence
 	url = https://github.com/SeleneWorlds/Consequence.git
-[submodule "bundles/moonlight-admin"]
-	path = bundles/moonlight-admin
-	url = https://github.com/SeleneWorlds/Moonlight-Admin.git
 [submodule "bundles/illarion-admin-menu"]
 	path = bundles/illarion-admin-menu
 	url = https://github.com/SeleneWorlds/Illarion-Admin-Menu.git
-[submodule "bundles/moonlight-editor"]
-	path = bundles/moonlight-editor
-	url = https://github.com/SeleneWorlds/Moonlight-Editor.git
+[submodule "moonlight"]
+	path = moonlight
+	url = https://github.com/SeleneWorlds/Moonlight.git

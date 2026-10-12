@@ -11,6 +11,10 @@ This Docker Compose setup runs Illarion Gobaith on Selene.
    private keys and webhook secret.
 4. Run `docker compose up --build -d`.
 
+The `moonlight/` submodule uses the [Moonlight monorepo](https://github.com/SeleneWorlds/Moonlight)
+for the admin, editor, and inventory bundles. The image copies those bundles into
+`/app/bundles/` alongside the Illarion bundles.
+
 The Selene image compiles the player, admin, and editor UIs and includes the
 remaining bundles and server configuration. The Go `repo-sync` sidecar clones
 `illarion-gobaith-data` and `illarion-gobaith` into persistent volumes instead of
