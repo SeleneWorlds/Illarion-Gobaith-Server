@@ -1,33 +1,41 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-alpine AS ui-build
+FROM node:22-alpine AS ui-build-base
+
+RUN apk add --no-cache git \
+    && corepack enable
+
+
+FROM ui-build-base AS ui-build
 
 WORKDIR /src
-COPY bundles/illarion-gobaith-ui/package*.json ./
-RUN npm ci
+COPY bundles/illarion-gobaith-ui/package.json bundles/illarion-gobaith-ui/pnpm-lock.yaml bundles/illarion-gobaith-ui/pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY bundles/illarion-gobaith-ui/ ./
-RUN npm run build
+RUN pnpm run build
 
 
-FROM node:22-alpine AS admin-ui-build
+FROM ui-build-base AS admin-ui-build
 
-WORKDIR /src
-COPY moonlight/moonlight-admin/package*.json ./
-RUN npm ci
+COPY moonlight/moonlight-ui/ /src/moonlight-ui/
+WORKDIR /src/moonlight-admin
+COPY moonlight/moonlight-admin/package.json moonlight/moonlight-admin/pnpm-lock.yaml moonlight/moonlight-admin/pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY moonlight/moonlight-admin/ ./
-RUN npm run build
+RUN pnpm run build
 
 
-FROM node:22-alpine AS editor-ui-build
+FROM ui-build-base AS editor-ui-build
 
-WORKDIR /src
-COPY moonlight/moonlight-editor/package*.json ./
-RUN npm ci
+COPY moonlight/moonlight-ui/ /src/moonlight-ui/
+WORKDIR /src/moonlight-editor
+COPY moonlight/moonlight-editor/package.json moonlight/moonlight-editor/pnpm-lock.yaml moonlight/moonlight-editor/pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY moonlight/moonlight-editor/ ./
-RUN npm run build
+RUN pnpm run build
 
 
 FROM docker.twelveiterations.com/seleneworlds/selene:main
@@ -35,6 +43,6 @@ FROM docker.twelveiterations.com/seleneworlds/selene:main
 COPY bundles/ /app/bundles/
 COPY moonlight/ /app/bundles/
 COPY --from=ui-build /src/client/ui/dist/ /app/bundles/illarion-gobaith-ui/client/ui/dist/
-COPY --from=admin-ui-build /src/client/ui/dist/ /app/bundles/moonlight-admin/client/ui/dist/
-COPY --from=editor-ui-build /src/client/ui/dist/ /app/bundles/moonlight-editor/client/ui/dist/
+COPY --from=admin-ui-build /src/moonlight-admin/client/ui/dist/ /app/bundles/moonlight-admin/client/ui/dist/
+COPY --from=editor-ui-build /src/moonlight-editor/client/ui/dist/ /app/bundles/moonlight-editor/client/ui/dist/
 COPY server.properties script.properties /app/
