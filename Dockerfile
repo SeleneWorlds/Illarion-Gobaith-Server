@@ -21,7 +21,9 @@ FROM ui-build-base AS admin-ui-build
 COPY moonlight/moonlight-ui/ /src/moonlight-ui/
 WORKDIR /src/moonlight-admin
 COPY moonlight/moonlight-admin/package.json moonlight/moonlight-admin/pnpm-lock.yaml moonlight/moonlight-admin/pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+# Shared sources in /src/moonlight-ui resolve dependencies through /src/node_modules.
+RUN pnpm install --frozen-lockfile \
+    && ln -s /src/moonlight-admin/node_modules /src/node_modules
 
 COPY moonlight/moonlight-admin/ ./
 RUN pnpm run build
@@ -32,7 +34,8 @@ FROM ui-build-base AS editor-ui-build
 COPY moonlight/moonlight-ui/ /src/moonlight-ui/
 WORKDIR /src/moonlight-editor
 COPY moonlight/moonlight-editor/package.json moonlight/moonlight-editor/pnpm-lock.yaml moonlight/moonlight-editor/pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile \
+    && ln -s /src/moonlight-editor/node_modules /src/node_modules
 
 COPY moonlight/moonlight-editor/ ./
 RUN pnpm run build
