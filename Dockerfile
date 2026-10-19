@@ -8,9 +8,12 @@ RUN apk add --no-cache git \
 
 FROM ui-build-base AS ui-build
 
-WORKDIR /src
+COPY moonlight/moonlight-ui/ /src/moonlight/moonlight-ui/
+WORKDIR /src/illarion-gobaith-ui
 COPY bundles/illarion-gobaith-ui/package.json bundles/illarion-gobaith-ui/pnpm-lock.yaml bundles/illarion-gobaith-ui/pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+# Shared sources in /src/moonlight/moonlight-ui resolve dependencies through /src/node_modules.
+RUN pnpm install --frozen-lockfile \
+    && ln -s /src/illarion-gobaith-ui/node_modules /src/node_modules
 
 COPY bundles/illarion-gobaith-ui/ ./
 RUN pnpm run build
@@ -45,7 +48,7 @@ FROM docker.twelveiterations.com/seleneworlds/selene:main
 
 COPY bundles/ /app/bundles/
 COPY moonlight/ /app/bundles/
-COPY --from=ui-build /src/client/ui/dist/ /app/bundles/illarion-gobaith-ui/client/ui/dist/
+COPY --from=ui-build /src/illarion-gobaith-ui/client/ui/dist/ /app/bundles/illarion-gobaith-ui/client/ui/dist/
 COPY --from=admin-ui-build /src/moonlight-admin/client/ui/dist/ /app/bundles/moonlight-admin/client/ui/dist/
 COPY --from=editor-ui-build /src/moonlight-editor/client/ui/dist/ /app/bundles/moonlight-editor/client/ui/dist/
 COPY server.properties script.properties /app/
