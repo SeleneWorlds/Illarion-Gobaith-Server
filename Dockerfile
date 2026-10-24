@@ -50,7 +50,9 @@ FROM docker.twelveiterations.com/seleneworlds/selene:main
 
 COPY bundles/ /app/bundles/
 COPY moonlight/ /app/bundles/
-COPY --from=ui-build /src/illarion-gobaith-ui/client/ui/dist/ /app/bundles/illarion-gobaith-ui/client/ui/dist/
+COPY bundles/illarion-gobaith-ui/illarion-client-core/ /app/bundles/illarion-client-core/
+COPY bundles/illarion-gobaith-ui/illarion-gobaith-ui/ /app/bundles/illarion-gobaith-ui/
+COPY --from=ui-build /src/illarion-gobaith-ui/illarion-gobaith-ui/client/ui/dist/ /app/bundles/illarion-gobaith-ui/client/ui/dist/
 COPY --from=admin-ui-build /src/moonlight-admin/client/ui/dist/ /app/bundles/moonlight-admin/client/ui/dist/
 COPY --from=editor-ui-build /src/moonlight-editor/client/ui/dist/ /app/bundles/moonlight-editor/client/ui/dist/
 COPY server.properties script.properties /app/
