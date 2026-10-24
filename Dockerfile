@@ -11,6 +11,8 @@ FROM ui-build-base AS ui-build
 COPY moonlight/moonlight-ui/ /src/moonlight/moonlight-ui/
 WORKDIR /src/illarion-gobaith-ui
 COPY bundles/illarion-gobaith-ui/package.json bundles/illarion-gobaith-ui/pnpm-lock.yaml bundles/illarion-gobaith-ui/pnpm-workspace.yaml ./
+COPY bundles/illarion-gobaith-ui/illarion-client-core/package.json ./illarion-client-core/package.json
+COPY bundles/illarion-gobaith-ui/illarion-gobaith-ui/package.json ./illarion-gobaith-ui/package.json
 # Shared sources in /src/moonlight/moonlight-ui resolve dependencies through /src/node_modules.
 RUN pnpm install --frozen-lockfile \
     && ln -s /src/illarion-gobaith-ui/node_modules /src/node_modules
