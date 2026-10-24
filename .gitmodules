@@ -13,6 +13,7 @@
 [submodule "bundles/illarion-gobaith-assets"]
 	path = bundles/illarion-gobaith-assets
 	url = https://github.com/SeleneWorlds/Illarion-Gobaith-Assets.git
+	branch = 128px
 [submodule "bundles/consequence"]
 	path = bundles/consequence
 	url = https://github.com/SeleneWorlds/Consequence.git
