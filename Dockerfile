@@ -48,7 +48,7 @@ RUN pnpm run build
 
 FROM docker.twelveiterations.com/seleneworlds/selene:main
 
-COPY bundles/ /app/bundles/
+COPY --exclude=illarion-gobaith-ui bundles/ /app/bundles/
 COPY moonlight/ /app/bundles/
 COPY bundles/illarion-gobaith-ui/illarion-client-core/ /app/bundles/illarion-client-core/
 COPY bundles/illarion-gobaith-ui/illarion-gobaith-ui/ /app/bundles/illarion-gobaith-ui/
